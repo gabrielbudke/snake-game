@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Meu Primeiro Jogo da Cobrinha</title>
+
+   <style>
+      #screen {
+         border: 1px solid #CCC;
+         background-color: #9BC405;
+         image-rendering: pixelated;
+         image-rendering: crisp-edges;
+         image-rendering: -moz-crisp-edges;
+         width: 40px;
+         height: 40px;
+      }
+   </style>
+
+
+</head>
+<body>
+   <canvas id="screen" width="10px" height="10px"></canvas>
+
+   <script>
+      const screen = document.getElementById('screen');
+      const context = screen.getContext('2d'); 
+      
+      const game = {
+         snake: [
+            { x: 5, y: 5 }
+         ],
+         fruit: {},
+         direction: 'right'
+      };
+
+      document.addEventListener('keydown', handleKeydown);
+
+      function handleKeydown(event) {
+         const keyPressed = event.key;
+         
+         if(keyPressed === 'ArrowUp') {
+            console.log('up');
+            return;
+         }
+
+         if(keyPressed === 'ArrowRight' && direction !== 'left') {
+            console.log('right');
+            game.direction = 'right'
+            return;
+         }
+
+         if(keyPressed === 'ArrowDown') {
+            console.log('down');
+            return;
+         }
+
+         if(keyPressed === 'ArrowLeft' && direction !== 'right') {
+            console.log('left');
+            game.direction = 'left'
+            return;
+         }
+
+      }
+ 
+      function renderSnake() {         
+         for(const index in game.snake) {                                     
+            context.fillStyle = 'black';
+            context.fillRect(game.snake[index].x, game.snake[index].y, 1, 1); 
+         }        
+      }
+            
+
+      function startGame() {
+         // Limpa a tela do jogo
+         context.fillStyle = '#9BC405';
+         context.clearRect(0, 0, 10, 10);
+
+         // Renderiza a cobrinha
+         renderSnake();
+
+         let snakeX = game.snake[0].x;
+         let snakeY = game.snake[0].y;
+
+         if(game.direction === 'right') {
+            snakeX = snakeX + 1;
+         }
+
+         if(game.direction === 'left') {
+            snakeX = snakeX - 1;
+         }
+
+         game.snake.pop();
+
+         const newSnake = {
+            x: snakeX,
+            y: snakeY
+         }
+
+         game.snake.unshift(newSnake);          
+         
+      }
+
+      setInterval(startGame, 200);
+   </script>
+   
+</body>
+</html>
