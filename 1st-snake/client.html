@@ -86,7 +86,6 @@
                snakeY = snakeY + 1;
             }
 
-
             state.snake.pop();
             state.snake.unshift({ x: snakeX, y: snakeY });
          }
@@ -94,6 +93,7 @@
 
          return { state, moveSnake, handleDriveSnake }
       }
+
 
       const game = createGame();
 
@@ -107,10 +107,13 @@
          }
 
          game.moveSnake(command);
-
       }
 
       function renderSnakeAndFruit() {
+
+         context.fillStyle = '#9BC405';
+         context.clearRect(0, 0, 10, 10);
+
          for (const index in game.state.snake) {
             context.fillStyle = 'black';
             context.fillRect(game.state.snake[index].x, game.state.snake[index].y, 1, 1);
@@ -124,8 +127,8 @@
       function startGame() {
          
          // Limpa a tela do jogo
-         context.fillStyle = '#9BC405';
-         context.clearRect(0, 0, 10, 10);
+         /*context.fillStyle = '#9BC405';
+         context.clearRect(0, 0, 10, 10);*/
 
          if (game.state.snake[0].x > 9 && game.state.direction === 'right' || game.state.snake[0].x > 9 && game.state.direction === 'up' || game.state.snake[0].x > 9 && game.state.direction === 'down') {
             game.state.snake[0].x = 0;
