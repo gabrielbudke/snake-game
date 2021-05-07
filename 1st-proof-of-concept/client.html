@@ -28,8 +28,7 @@
       function createGame() {
          const state = {
             snake: [
-               { x: 1, y: 5 },
-               { x: 2, y: 5 }
+               { x: 1, y: 5 }
             ],
             fruit: {
                x: Math.floor(Math.random() * 9 + 1) * 1,
@@ -48,7 +47,6 @@
          }
 
          function handleSnakeMovement() {
-
             let snakeX = state.snake[0].x;
             let snakeY = state.snake[0].y;
 
@@ -67,8 +65,11 @@
             if (state.direction === 'up') {
                snakeY = snakeY - 1;
             }
-            
-            checkForFruitCollition({snakeX, snakeY});
+
+            if(!checkForFruitCollition({ snakeX, snakeY })){
+               state.snake.pop();
+            }
+                                    
             state.snake.unshift({ x: snakeX, y: snakeY });
 
             if (state.snake[0].x > 9 && state.direction === 'right') {
@@ -88,7 +89,6 @@
             }
 
          }
-
 
          function moveSnake(command) {
             const acceptedMoves = {
@@ -131,23 +131,25 @@
 
          }
 
-         function checkForFruitCollition() {
+         function checkForFruitCollition(coordenates) {            
 
-            const snakeX = state.snake[0].x;
-            const snakeY = state.snake[0].y;            
+            const { snakeX, snakeY } = coordenates;
+            //const snakeY = state.snake[0].y;
 
-            if (snakeX === state.fruit.x && snakeY === state.fruit.y) {               
-               const fruit = {
+            if (state.snake[0].x === state.fruit.x && state.snake[0].y === state.fruit.y) {
+               console.log(`Colisão entre snake e fruit`);
+               
+               addFruit({
                   x: Math.floor(Math.random() * 9 + 1) * 1,
                   y: Math.floor(Math.random() * 9 + 1) * 1
-               };               
-               addFruit(fruit);
+               });               
 
-               return;
-            }
+               return true;   
 
-            state.snake.pop();
-
+            }                        
+            
+            return false;
+    
          }
 
          return { state, handleSnakeMovement, moveSnake, addFruit, checkForFruitCollition };
@@ -190,22 +192,34 @@
       function renderScreen() {
          context.fillStyle = 'white';
          context.clearRect(0, 0, 10, 10);
+         
+         context.fillStyle = 'red';
+         context.fillRect(game.state.fruit.x, game.state.fruit.y, 1, 1);
 
          for (const index in game.state.snake) {
             context.fillStyle = 'black';
             context.fillRect(game.state.snake[index].x, game.state.snake[index].y, 1, 1);
          }
 
-         context.fillStyle = 'red';
-         context.fillRect(game.state.fruit.x, game.state.fruit.y, 1, 1);
       }
 
       function startGame() {
+
+         for (let index = 1; index < game.state.snake.length; index++) {
+            console.log(`[game.state.snake[0].x] > ${game.state.snake[0].x}`);
+            console.log(`[game.state.snake[index].x] > ${game.state.snake[index].x}`);
+            
+            if (game.state.snake[0].x === game.state.snake[index].x && game.state.snake[0].y === game.state.snake[index].y) {                              
+               clearInterval(runtime);
+               alert('Game-Over!');
+            }
+         }
+
          renderScreen();
          game.handleSnakeMovement();
       }
 
-      setInterval(startGame, 100);
+      const runtime = setInterval(startGame, 100);
 
    </script>
 
