@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +16,7 @@
       }
    </style>
 </head>
+
 <body>
    <canvas id="screen" width="10" height="10"></canvas>
 
@@ -23,106 +25,190 @@
       const screen = document.getElementById('screen');
       const context = screen.getContext('2d');
 
-      const game = {
-         snake: [
-            { x: 1, y: 5 }
-         ],
-         fruit: { x: 2, y: 2 },
-         direction: 'right'
-      };
+      function createGame() {
+         const state = {
+            snake: [
+               { x: 1, y: 5 },
+               { x: 2, y: 5 }
+            ],
+            fruit: {
+               x: Math.floor(Math.random() * 9 + 1) * 1,
+               y: Math.floor(Math.random() * 9 + 1) * 1
+            },
+            direction: 'right'
+         };
 
-      document.addEventListener('keydown', handleKeydown);
+         function addFruit(fruit) {
+            const fruitX = fruit.x;
+            const fruitY = fruit.y;
 
-      function handleKeydown(event) {
-         const keyPressed = event.key;
+            state.fruit = fruit;
 
-         if(keyPressed === 'ArrowUp' && game.direction !== 'down') {            
-            game.direction = 'up';
-            return
+            return;
          }
 
-         if(keyPressed === 'ArrowRight' && game.direction !== 'left') {            
-            game.direction = 'right';
-            return
+         function handleSnakeMovement() {
+
+            let snakeX = state.snake[0].x;
+            let snakeY = state.snake[0].y;
+
+            if (state.direction === 'right') {
+               snakeX = snakeX + 1;
+            }
+
+            if (state.direction === 'left') {
+               snakeX = snakeX - 1;
+            }
+
+            if (state.direction === 'down') {
+               snakeY = snakeY + 1;
+            }
+
+            if (state.direction === 'up') {
+               snakeY = snakeY - 1;
+            }
+            
+            checkForFruitCollition({snakeX, snakeY});
+            state.snake.unshift({ x: snakeX, y: snakeY });
+
+            if (state.snake[0].x > 9 && state.direction === 'right') {
+               state.snake[0].x = 0;
+            }
+
+            if (state.snake[0].x < 0 && state.direction === 'left') {
+               state.snake[0].x = 9;
+            }
+
+            if (state.snake[0].y > 9 && state.direction === 'down') {
+               state.snake[0].y = 0;
+            }
+
+            if (state.snake[0].y < 0 && state.direction === 'up') {
+               state.snake[0].y = 9;
+            }
+
          }
 
-         if(keyPressed === 'ArrowDown' && game.direction !== 'up') {            
-            game.direction = 'down';
-            return
+
+         function moveSnake(command) {
+            const acceptedMoves = {
+               ArrowUp(direction) {
+                  if (state.direction !== 'down') {
+                     state.direction = direction;
+                     return;
+                  }
+               },
+
+               ArrowRight(direction) {
+                  if (state.direction !== 'left') {
+                     state.direction = direction;
+                     return;
+                  }
+               },
+
+               ArrowDown(direction) {
+                  if (state.direction !== 'up') {
+                     state.direction = direction;
+                     return;
+                  }
+               },
+
+               ArrowLeft(direction) {
+                  if (state.direction !== 'right') {
+                     state.direction = direction;
+                     return;
+                  }
+               }
+            };
+
+            const keyPressed = command.keyPressed;
+            const direction = command.direction;
+            const moveFunction = acceptedMoves[keyPressed];
+
+            if (moveFunction) {
+               moveFunction(direction);
+            }
+
          }
 
-         if(keyPressed === 'ArrowLeft' && game.direction !== 'right') {            
-            game.direction = 'left';
-            return
+         function checkForFruitCollition() {
+
+            const snakeX = state.snake[0].x;
+            const snakeY = state.snake[0].y;            
+
+            if (snakeX === state.fruit.x && snakeY === state.fruit.y) {               
+               const fruit = {
+                  x: Math.floor(Math.random() * 9 + 1) * 1,
+                  y: Math.floor(Math.random() * 9 + 1) * 1
+               };               
+               addFruit(fruit);
+
+               return;
+            }
+
+            state.snake.pop();
+
          }
+
+         return { state, handleSnakeMovement, moveSnake, addFruit, checkForFruitCollition };
+      }
+
+      const game = createGame();
+      const keyboardListener = createKeyboardListener();
+      keyboardListener.subscribe(game.moveSnake);
+
+      function createKeyboardListener() {
+         const state = {
+            observers: []
+         };
+
+         function subscribe(observerFunction) {
+            state.observers.push(observerFunction);
+         }
+
+         function notifyAll(command) {
+            for (const observerFunction of state.observers) {
+               observerFunction(command);
+            }
+         }
+
+         document.addEventListener('keydown', handleKeydown);
+
+         function handleKeydown(event) {
+            const keyPressed = event.key;
+            const direction = event.code.substring(5).toLowerCase()
+
+            const command = { keyPressed, direction };
+
+            notifyAll(command);
+         }
+
+         return { subscribe }
 
       }
 
       function renderScreen() {
-
          context.fillStyle = 'white';
          context.clearRect(0, 0, 10, 10);
 
-         for(const index in game.snake) {
+         for (const index in game.state.snake) {
             context.fillStyle = 'black';
-            context.fillRect(game.snake[index].x, game.snake[index].y, 1, 1);
+            context.fillRect(game.state.snake[index].x, game.state.snake[index].y, 1, 1);
          }
 
          context.fillStyle = 'red';
-         context.fillRect(game.fruit.x, game.fruit.y, 1, 1);            
-         
-      }
-
-      function handleSnakeMovement() {
-
-         let snake_x = game.snake[0].x;
-         let snake_y = game.snake[0].y;
-
-         if(game.direction === 'right') {
-            snake_x = snake_x + 1;
-         }
-
-         if(game.direction === 'left') {
-            snake_x = snake_x - 1;
-         }
-
-         if(game.direction === 'down') {
-            snake_y = snake_y + 1;
-         }
-
-         if(game.direction === 'up') {
-            snake_y = snake_y - 1;
-         }
-
-         game.snake.pop();         
-         game.snake.unshift({ x: snake_x, y: snake_y });          
-
-         if(game.snake[0].x > 9 && game.direction === 'right') {
-            game.snake[0].x = 0;
-         }
-
-         if(game.snake[0].x < 0 && game.direction === 'left') {
-            game.snake[0].x = 9;
-         }
-
-         if(game.snake[0].y > 9 && game.direction === 'down') {
-            game.snake[0].y = 0;
-         }
-
-         if(game.snake[0].y < 0 && game.direction === 'up') {
-            game.snake[0].y = 9;
-         }
-       
+         context.fillRect(game.state.fruit.x, game.state.fruit.y, 1, 1);
       }
 
       function startGame() {
          renderScreen();
-         handleSnakeMovement();      
-      } 
+         game.handleSnakeMovement();
+      }
 
       setInterval(startGame, 100);
 
    </script>
 
 </body>
+
 </html>
