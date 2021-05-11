@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>POC Jogo da Cobrinha</title>
+   <style>
+      #screen {
+         border: 10px solid #CCC;
+         image-rendering: pixelated;
+         image-rendering: crisp-edges;
+         image-rendering: -moz-crisp-edges;
+         width: 400px;
+         height: 400px;
+      }
+   </style>
+</head>
+
+<body>
+   <canvas id="screen" width="10" height="10"></canvas>
+
+   <script type="module">
+      import createGame from './game.js';
+      import createKeyboardListener from './keyboard-listener.js';
+      import renderScreen from './render-screen.js';
+      
+      const screen = document.getElementById('screen');
+      const context = screen.getContext('2d');
+      
+      const game = createGame();
+      const keyboardListener = createKeyboardListener();
+      keyboardListener.subscribe(game.moveSnake);
+
+      
+
+      function startGame() {
+
+         for (let index = 1; index < game.state.snake.length; index++) {                    
+            if (game.state.snake[0].x === game.state.snake[index].x && game.state.snake[0].y === game.state.snake[index].y) {                              
+               clearInterval(runtime);
+               alert('Game-Over!');
+            }
+         }
+
+         renderScreen(screen, game);
+         game.handleSnakeMovement();
+      }
+
+      const runtime = setInterval(startGame, 100);
+
+   </script>
+
+</body>
+
+</html>
