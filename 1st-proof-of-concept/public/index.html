@@ -25,24 +25,22 @@
       import createKeyboardListener from './keyboard-listener.js';
       import renderScreen from './render-screen.js';
       
-      const screen = document.getElementById('screen');
-      const context = screen.getContext('2d');
       
       const game = createGame();
       const keyboardListener = createKeyboardListener();
       keyboardListener.subscribe(game.moveSnake);
 
       
-
       function startGame() {
-
+         
          for (let index = 1; index < game.state.snake.length; index++) {                    
             if (game.state.snake[0].x === game.state.snake[index].x && game.state.snake[0].y === game.state.snake[index].y) {                              
                clearInterval(runtime);
                alert('Game-Over!');
             }
          }
-
+         
+         const screen = document.getElementById('screen');      
          renderScreen(screen, game);
          game.handleSnakeMovement();
       }
